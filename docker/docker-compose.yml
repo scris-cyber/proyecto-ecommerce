@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  spark-master:
+    image: bde2020/spark-master:3.1.1-hadoop3.2
+    container_name: spark-master
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    volumes:
+      - ../src:/app/src
+      - ../ontology:/app/ontology
+    environment:
+      - INIT_DAEMON=false
+
+  spark-worker:
+    image: bde2020/spark-worker:3.1.1-hadoop3.2
+    container_name: spark-worker
+    depends_on:
+      - spark-master
+    ports:
+      - "8081:8081"
+    volumes:
+      - ../src:/app/src
+      - ../ontology:/app/ontology
+    environment:
+      - "SPARK_MASTER=spark://spark-master:7077"
