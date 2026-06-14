@@ -33,3 +33,15 @@ services:
       - SPARK_CORE_CONF_spark_authenticate_secret=CybersecurityTEC2026!
       - SPARK_CORE_CONF_spark_network_crypto_enabled=true
       - SPARK_CORE_CONF_spark_io_encryption_enabled=true
+
+  postgres-output:
+    image: postgres:15
+    container_name: postgres-output
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=app_analytics
+      - POSTGRES_PASSWORD=SecureAnalytics2026!
+      - POSTGRES_DB=ecommerce_analytics
+    volumes:
+      - ../database:/docker-entrypoint-initdb.d
