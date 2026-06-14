@@ -12,6 +12,10 @@ services:
       - ../ontology:/app/ontology
     environment:
       - INIT_DAEMON=false
+      - SPARK_CORE_CONF_spark_authenticate=true
+      - SPARK_CORE_CONF_spark_authenticate_secret=CybersecurityTEC2026!
+      - SPARK_CORE_CONF_spark_network_crypto_enabled=true
+      - SPARK_CORE_CONF_spark_io_encryption_enabled=true
 
   spark-worker:
     image: bde2020/spark-worker:3.1.1-hadoop3.2
@@ -25,3 +29,7 @@ services:
       - ../ontology:/app/ontology
     environment:
       - "SPARK_MASTER=spark://spark-master:7077"
+      - SPARK_CORE_CONF_spark_authenticate=true
+      - SPARK_CORE_CONF_spark_authenticate_secret=CybersecurityTEC2026!
+      - SPARK_CORE_CONF_spark_network_crypto_enabled=true
+      - SPARK_CORE_CONF_spark_io_encryption_enabled=true

@@ -2,10 +2,14 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, count, avg, round, datediff
 
 def main():
-    # 1. Initialize Spark Session within the cluster
+    # 1. Initialize Spark Session within the secured cluster
     spark = SparkSession.builder \
         .appName("ECommerceOntologyMapping") \
         .master("spark://spark-master:7077") \
+        .config("spark.authenticate", "true") \
+        .config("spark.authenticate.secret", "CybersecurityTEC2026!") \
+        .config("spark.network.crypto.enabled", "true") \
+        .config("spark.io.encryption_enabled", "true") \
         .getOrCreate()
     
     print("\nLOG: Spark Session successfully initialized.")
@@ -70,7 +74,6 @@ def main():
     columns_delivery = ["order_id_hash", "purchase_date", "delivered_date"]
     df_delivery = spark.createDataFrame(raw_data_delivery, schema=columns_delivery)
 
-    # Calculate delivery timeframe in days
     df_delivery_days = df_delivery.withColumn("Delivery_Days", datediff(col("delivered_date"), col("purchase_date")))
 
     print("\nLOG: Processing Aggregation 3 (Logistics efficiency analysis in days)...")
