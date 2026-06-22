@@ -1,0 +1,398 @@
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix eco:  <http://tec.ac.cr/ontology/ecommerce#> .
+
+# Ontología para el proyecto de Administración Segura de Datos
+# Dataset: Olist Brazilian E-Commerce (Kaggle)
+# TEC 2026
+
+eco: a owl:Ontology ;
+    rdfs:label "Olist E-Commerce Ontology" ;
+    rdfs:comment "Modela las entidades y relaciones del dataset de Olist. Se marcaron los campos sensibles para guiar la ofuscación en Spark." .
+
+
+# ------------------------------------------------------------------
+# CLASES
+# ------------------------------------------------------------------
+
+eco:Customer a owl:Class ;
+    rdfs:label "Customer" ;
+    rdfs:comment "Cliente que hizo al menos una compra." .
+
+eco:Order a owl:Class ;
+    rdfs:label "Order" ;
+    rdfs:comment "Pedido. Puede tener varios items y varios pagos." .
+
+eco:OrderItem a owl:Class ;
+    rdfs:label "OrderItem" ;
+    rdfs:comment "Un producto dentro de un pedido, vendido por un seller específico." .
+
+eco:Product a owl:Class ;
+    rdfs:label "Product" .
+
+eco:ProductCategory a owl:Class ;
+    rdfs:label "ProductCategory" .
+
+eco:Seller a owl:Class ;
+    rdfs:label "Seller" ;
+    rdfs:comment "Vendedor registrado en la plataforma." .
+
+eco:Payment a owl:Class ;
+    rdfs:label "Payment" ;
+    rdfs:comment "Pago de un pedido. Un mismo pedido puede tener pagos en cuotas." .
+
+eco:Review a owl:Class ;
+    rdfs:label "Review" ;
+    rdfs:comment "Reseña que deja el cliente después de recibir el pedido." .
+
+eco:Geolocation a owl:Class ;
+    rdfs:label "Geolocation" ;
+    rdfs:comment "Datos geográficos por código postal." .
+
+
+# ------------------------------------------------------------------
+# IDs - todos sensibles, se hashean
+# ------------------------------------------------------------------
+
+eco:customerId a owl:DatatypeProperty ;
+    rdfs:domain eco:Customer ;
+    rdfs:range  xsd:string ;
+    rdfs:label  "customer_id" ;
+    eco:sensitivity "high" .
+
+eco:customerUniqueId a owl:DatatypeProperty ;
+    rdfs:domain eco:Customer ;
+    rdfs:range  xsd:string ;
+    rdfs:label  "customer_unique_id" ;
+    rdfs:comment "Identifica al mismo cliente aunque haga varios pedidos." ;
+    eco:sensitivity "high" .
+
+eco:orderId a owl:DatatypeProperty ;
+    rdfs:domain eco:Order ;
+    rdfs:range  xsd:string ;
+    rdfs:label  "order_id" ;
+    eco:sensitivity "high" .
+
+eco:productId a owl:DatatypeProperty ;
+    rdfs:domain eco:Product ;
+    rdfs:range  xsd:string ;
+    rdfs:label  "product_id" ;
+    eco:sensitivity "high" .
+
+eco:sellerId a owl:DatatypeProperty ;
+    rdfs:domain eco:Seller ;
+    rdfs:range  xsd:string ;
+    rdfs:label  "seller_id" ;
+    eco:sensitivity "high" .
+
+eco:reviewId a owl:DatatypeProperty ;
+    rdfs:domain eco:Review ;
+    rdfs:range  xsd:string ;
+    rdfs:label  "review_id" ;
+    eco:sensitivity "high" .
+
+
+# ------------------------------------------------------------------
+# Cliente
+# ------------------------------------------------------------------
+
+eco:customerZipCode a owl:DatatypeProperty ;
+    rdfs:domain eco:Customer ;
+    rdfs:range  xsd:integer ;
+    rdfs:label  "customer_zip_code_prefix" ;
+    rdfs:comment "Código postal - se ofusca, solo se guarda el estado." ;
+    eco:sensitivity "medium" .
+
+eco:customerCity a owl:DatatypeProperty ;
+    rdfs:domain eco:Customer ;
+    rdfs:range  xsd:string ;
+    rdfs:label  "customer_city" ;
+    eco:sensitivity "low" .
+
+eco:customerState a owl:DatatypeProperty ;
+    rdfs:domain eco:Customer ;
+    rdfs:range  xsd:string ;
+    rdfs:label  "customer_state" ;
+    eco:sensitivity "low" .
+
+
+# ------------------------------------------------------------------
+# Pedido
+# ------------------------------------------------------------------
+
+eco:orderStatus a owl:DatatypeProperty ;
+    rdfs:domain eco:Order ;
+    rdfs:range  xsd:string ;
+    rdfs:label  "order_status" ;
+    eco:sensitivity "low" .
+
+eco:orderPurchaseTimestamp a owl:DatatypeProperty ;
+    rdfs:domain eco:Order ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:label  "order_purchase_timestamp" ;
+    rdfs:comment "Fecha exacta de compra - se trunca al mes para no exponer hora exacta." ;
+    eco:sensitivity "medium" .
+
+eco:orderApprovedAt a owl:DatatypeProperty ;
+    rdfs:domain eco:Order ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:label  "order_approved_at" ;
+    eco:sensitivity "medium" .
+
+eco:orderDeliveredCarrierDate a owl:DatatypeProperty ;
+    rdfs:domain eco:Order ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:label  "order_delivered_carrier_date" ;
+    eco:sensitivity "low" .
+
+eco:orderDeliveredCustomerDate a owl:DatatypeProperty ;
+    rdfs:domain eco:Order ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:label  "order_delivered_customer_date" ;
+    eco:sensitivity "medium" .
+
+eco:orderEstimatedDeliveryDate a owl:DatatypeProperty ;
+    rdfs:domain eco:Order ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:label  "order_estimated_delivery_date" ;
+    eco:sensitivity "low" .
+
+
+# ------------------------------------------------------------------
+# Item de pedido - precios son sensibles
+# ------------------------------------------------------------------
+
+eco:orderItemId a owl:DatatypeProperty ;
+    rdfs:domain eco:OrderItem ;
+    rdfs:range  xsd:integer ;
+    rdfs:label  "order_item_id" ;
+    eco:sensitivity "low" .
+
+eco:price a owl:DatatypeProperty ;
+    rdfs:domain eco:OrderItem ;
+    rdfs:range  xsd:decimal ;
+    rdfs:label  "price" ;
+    rdfs:comment "Precio real - se reemplaza por rango (ej: 100-249)." ;
+    eco:sensitivity "high" .
+
+eco:freightValue a owl:DatatypeProperty ;
+    rdfs:domain eco:OrderItem ;
+    rdfs:range  xsd:decimal ;
+    rdfs:label  "freight_value" ;
+    eco:sensitivity "high" .
+
+eco:shippingLimitDate a owl:DatatypeProperty ;
+    rdfs:domain eco:OrderItem ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:label  "shipping_limit_date" ;
+    eco:sensitivity "low" .
+
+
+# ------------------------------------------------------------------
+# Producto
+# ------------------------------------------------------------------
+
+eco:productCategoryName a owl:DatatypeProperty ;
+    rdfs:domain eco:Product ;
+    rdfs:range  xsd:string ;
+    rdfs:label  "product_category_name" ;
+    eco:sensitivity "low" .
+
+eco:productCategoryNameEnglish a owl:DatatypeProperty ;
+    rdfs:domain eco:Product ;
+    rdfs:range  xsd:string ;
+    rdfs:label  "product_category_name_english" ;
+    eco:sensitivity "low" .
+
+eco:productWeightG a owl:DatatypeProperty ;
+    rdfs:domain eco:Product ;
+    rdfs:range  xsd:integer ;
+    rdfs:label  "product_weight_g" ;
+    eco:sensitivity "medium" .
+
+eco:productLengthCm a owl:DatatypeProperty ;
+    rdfs:domain eco:Product ;
+    rdfs:range  xsd:integer ;
+    rdfs:label  "product_length_cm" ;
+    eco:sensitivity "low" .
+
+eco:productHeightCm a owl:DatatypeProperty ;
+    rdfs:domain eco:Product ;
+    rdfs:range  xsd:integer ;
+    rdfs:label  "product_height_cm" ;
+    eco:sensitivity "low" .
+
+eco:productWidthCm a owl:DatatypeProperty ;
+    rdfs:domain eco:Product ;
+    rdfs:range  xsd:integer ;
+    rdfs:label  "product_width_cm" ;
+    eco:sensitivity "low" .
+
+eco:productPhotosQty a owl:DatatypeProperty ;
+    rdfs:domain eco:Product ;
+    rdfs:range  xsd:integer ;
+    rdfs:label  "product_photos_qty" ;
+    eco:sensitivity "low" .
+
+
+# ------------------------------------------------------------------
+# Pago
+# ------------------------------------------------------------------
+
+eco:paymentSequential a owl:DatatypeProperty ;
+    rdfs:domain eco:Payment ;
+    rdfs:range  xsd:integer ;
+    rdfs:label  "payment_sequential" ;
+    eco:sensitivity "low" .
+
+eco:paymentType a owl:DatatypeProperty ;
+    rdfs:domain eco:Payment ;
+    rdfs:range  xsd:string ;
+    rdfs:label  "payment_type" ;
+    rdfs:comment "Tipo de pago: credit_card, boleto, voucher, debit_card." ;
+    eco:sensitivity "low" .
+
+eco:paymentInstallments a owl:DatatypeProperty ;
+    rdfs:domain eco:Payment ;
+    rdfs:range  xsd:integer ;
+    rdfs:label  "payment_installments" ;
+    eco:sensitivity "medium" .
+
+eco:paymentValue a owl:DatatypeProperty ;
+    rdfs:domain eco:Payment ;
+    rdfs:range  xsd:decimal ;
+    rdfs:label  "payment_value" ;
+    eco:sensitivity "high" .
+
+
+# ------------------------------------------------------------------
+# Reseña - el texto del comentario es muy sensible
+# ------------------------------------------------------------------
+
+eco:reviewScore a owl:DatatypeProperty ;
+    rdfs:domain eco:Review ;
+    rdfs:range  xsd:integer ;
+    rdfs:label  "review_score" ;
+    eco:sensitivity "low" .
+
+eco:reviewCommentTitle a owl:DatatypeProperty ;
+    rdfs:domain eco:Review ;
+    rdfs:range  xsd:string ;
+    rdfs:label  "review_comment_title" ;
+    rdfs:comment "Texto libre - se elimina, solo se guarda si existe o no (boolean)." ;
+    eco:sensitivity "high" .
+
+eco:reviewCommentMessage a owl:DatatypeProperty ;
+    rdfs:domain eco:Review ;
+    rdfs:range  xsd:string ;
+    rdfs:label  "review_comment_message" ;
+    rdfs:comment "Igual que el título, se ofusca completamente." ;
+    eco:sensitivity "high" .
+
+eco:reviewCreationDate a owl:DatatypeProperty ;
+    rdfs:domain eco:Review ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:label  "review_creation_date" ;
+    eco:sensitivity "medium" .
+
+eco:reviewAnswerTimestamp a owl:DatatypeProperty ;
+    rdfs:domain eco:Review ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:label  "review_answer_timestamp" ;
+    eco:sensitivity "low" .
+
+
+# ------------------------------------------------------------------
+# Geolocalización - coordenadas exactas son sensibles
+# ------------------------------------------------------------------
+
+eco:geoZipCodePrefix a owl:DatatypeProperty ;
+    rdfs:domain eco:Geolocation ;
+    rdfs:range  xsd:integer ;
+    rdfs:label  "geolocation_zip_code_prefix" ;
+    eco:sensitivity "medium" .
+
+eco:geoLat a owl:DatatypeProperty ;
+    rdfs:domain eco:Geolocation ;
+    rdfs:range  xsd:decimal ;
+    rdfs:label  "geolocation_lat" ;
+    rdfs:comment "Latitud - se trunca a 1 decimal para no exponer ubicación exacta." ;
+    eco:sensitivity "high" .
+
+eco:geoLng a owl:DatatypeProperty ;
+    rdfs:domain eco:Geolocation ;
+    rdfs:range  xsd:decimal ;
+    rdfs:label  "geolocation_lng" ;
+    eco:sensitivity "high" .
+
+eco:geoCity a owl:DatatypeProperty ;
+    rdfs:domain eco:Geolocation ;
+    rdfs:range  xsd:string ;
+    rdfs:label  "geolocation_city" ;
+    eco:sensitivity "low" .
+
+eco:geoState a owl:DatatypeProperty ;
+    rdfs:domain eco:Geolocation ;
+    rdfs:range  xsd:string ;
+    rdfs:label  "geolocation_state" ;
+    eco:sensitivity "low" .
+
+
+# ------------------------------------------------------------------
+# Relaciones entre entidades
+# ------------------------------------------------------------------
+
+eco:placedBy a owl:ObjectProperty ;
+    rdfs:domain eco:Order ;
+    rdfs:range  eco:Customer ;
+    rdfs:label  "placedBy" .
+
+eco:contains a owl:ObjectProperty ;
+    rdfs:domain eco:Order ;
+    rdfs:range  eco:OrderItem ;
+    rdfs:label  "contains" .
+
+eco:includes a owl:ObjectProperty ;
+    rdfs:domain eco:OrderItem ;
+    rdfs:range  eco:Product ;
+    rdfs:label  "includes" .
+
+eco:soldBy a owl:ObjectProperty ;
+    rdfs:domain eco:OrderItem ;
+    rdfs:range  eco:Seller ;
+    rdfs:label  "soldBy" .
+
+eco:paidWith a owl:ObjectProperty ;
+    rdfs:domain eco:Order ;
+    rdfs:range  eco:Payment ;
+    rdfs:label  "paidWith" .
+
+eco:hasReview a owl:ObjectProperty ;
+    rdfs:domain eco:Order ;
+    rdfs:range  eco:Review ;
+    rdfs:label  "hasReview" .
+
+eco:belongsToCategory a owl:ObjectProperty ;
+    rdfs:domain eco:Product ;
+    rdfs:range  eco:ProductCategory ;
+    rdfs:label  "belongsToCategory" .
+
+eco:locatedIn a owl:ObjectProperty ;
+    rdfs:domain eco:Customer ;
+    rdfs:range  eco:Geolocation ;
+    rdfs:label  "locatedIn" .
+
+eco:operatesIn a owl:ObjectProperty ;
+    rdfs:domain eco:Seller ;
+    rdfs:range  eco:Geolocation ;
+    rdfs:label  "operatesIn" .
+
+
+# ------------------------------------------------------------------
+# usa el job de Spark
+# ------------------------------------------------------------------
+
+eco:sensitivity a owl:AnnotationProperty ;
+    rdfs:comment "Nivel de protección: high = hashear o eliminar / medium = ofuscar a rango / low = dejar tal cual." .
